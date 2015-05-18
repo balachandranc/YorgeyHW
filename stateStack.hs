@@ -13,5 +13,6 @@ stackManip = do
     push 3
     a <- pop
     pop
+    pop
 
 main = putStrLn $ show $ runState stackManip [1,2,3]
