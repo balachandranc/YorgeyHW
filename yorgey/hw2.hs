@@ -40,33 +40,43 @@ countColors x = map countColor colors
 
 -- Count number of matches between the actual code and the guess
 matches :: Code -> Code -> Int
-matches = undefined
+matches xs ys = sum $ zipWith min ( countColors xs ) ( countColors ys ) 
 
 -- Exercise 3 -----------------------------------------
 
 -- Construct a Move from a guess given the actual code
 getMove :: Code -> Code -> Move
-getMove = undefined
+getMove secret guess = Move guess em ( m - em )
+    where   em = exactMatches secret guess
+            m = matches secret guess 
 
 -- Exercise 4 -----------------------------------------
 
 isConsistent :: Move -> Code -> Bool
-isConsistent = undefined
+isConsistent (Move move ex inex) code = ( exactMatches move code == ex ) && ( inexactMatches move code == inex )
+    where   inexactMatches x y = ( matches x y ) - ( exactMatches x y )
 
 -- Exercise 5 -----------------------------------------
 
 filterCodes :: Move -> [Code] -> [Code]
-filterCodes = undefined
+filterCodes move codes = filter ( isConsistent move ) codes
 
 -- Exercise 6 -----------------------------------------
 
+permute :: Int -> [a] -> [[a]]
+permute 0 _ = []
+permute 1 xs = map (\x->[x]) xs
+permute n xs = [ x : y | x <- xs, y <- permute ( n - 1 ) xs ]
+
 allCodes :: Int -> [Code]
-allCodes = undefined
+allCodes codeLen = permute codeLen colors
 
 -- Exercise 7 -----------------------------------------
 
 solve :: Code -> [Move]
-solve = undefined
+solve secret = solve' $ map ( getMove secret ) ( allCodes 4 )
+    where   solve' ((Move code a b):moves) = Move code a b : solve' ( filter ( \x -> not $ isConsistent x code ) moves )
+            solve' x = x
 
 -- Bonus ----------------------------------------------
 
