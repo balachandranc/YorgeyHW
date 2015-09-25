@@ -22,3 +22,11 @@ sumDigits x = sum $ x >>= toRevDigits
 luhn :: Integer -> Bool
 luhn x = ( checksum x ) `mod` 10 == 0
     where checksum = sumDigits . doubleEveryOther . toRevDigits
+
+
+type Peg = String
+type Move = (Peg, Peg)
+
+hanoi :: Integer -> Peg -> Peg -> Peg -> [Move]
+hanoi 1 src dst tmp = [(src,dst)]
+hanoi count src dst tmp = hanoi ( count - 1 ) src tmp dst ++ [(src,dst)] ++ hanoi ( count - 1 ) tmp dst src 
