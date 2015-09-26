@@ -44,7 +44,17 @@ empty = (\_ -> 0 )
 -- Exercise 2 -----------------------------------------
 
 evalE :: State -> Expression -> Int
-evalE = undefined
+evalE state (Var varName) = state varName
+evalE _ (Val value) = value
+evalE state ( Op left Plus right )  = ( evalE state left ) + ( evalE state right )
+evalE state ( Op left Minus right ) = ( evalE state left ) - ( evalE state right )
+evalE state ( Op left Times right ) = ( evalE state left ) * ( evalE state right )
+evalE state ( Op left Divide right ) = ( evalE state left ) `quot` ( evalE state right )
+evalE state ( Op left Gt right ) = if ( evalE state left ) > ( evalE state right ) then 1 else 0
+evalE state ( Op left Ge right ) = if ( evalE state left ) >= ( evalE state right ) then 1 else 0
+evalE state ( Op left Lt right ) = if ( evalE state left ) < ( evalE state right ) then 1 else 0
+evalE state ( Op left Le right ) = if ( evalE state left ) <= ( evalE state right ) then 1 else 0
+evalE state ( Op left Eql right ) = if ( evalE state left ) == ( evalE state right ) then 1 else 0
 
 -- Exercise 3 -----------------------------------------
 
