@@ -77,10 +77,18 @@ desugar (For init cond update body) = DSequence ( desugar init ) ( DWhile cond (
 -- Exercise 4 -----------------------------------------
 
 evalSimple :: State -> DietStatement -> State
-evalSimple = undefined
+evalSimple state (DAssign varName expression) = extend state varName ( evalE state expression )
+evalSimple state (DIf cond thenS elseS) = if (evalE state cond) == 1
+                                            then evalSimple state thenS
+                                            else evalSimple state elseS
+evalSimple state loop@(DWhile cond stmt) = if ( evalE state cond ) == 1
+                                            then evalSimple state ( DSequence stmt loop )
+                                            else state
+evalSimple state (DSequence s1 s2) = evalSimple ( evalSimple state s1 ) s2
+evalSimple state DSkip             = state
 
 run :: State -> Statement -> State
-run = undefined
+run state stmt = evalSimple state (desugar stmt)
 
 -- Programs -------------------------------------------
 
