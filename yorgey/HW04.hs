@@ -19,13 +19,16 @@ instance (Num a, Eq a) => Eq (Poly a) where
  
 -- Exercise 3 -----------------------------------------
 
+prefix :: (Num a, Eq a, Show a) => a -> String
 prefix 1 = ""
 prefix (-1) = "-"
 prefix p = show p
 
+suffix :: Int -> String
 suffix 1 = ""
 suffix ord = "^" ++ show ord
 
+term :: (Num a, Eq a, Show a) => (a, Int) -> String
 term ( coeff, 0 ) = show coeff
 term ( coeff, ord ) = ( prefix coeff ) ++ "x" ++ ( suffix ord )
 
@@ -37,7 +40,12 @@ instance (Num a, Eq a, Show a) => Show (Poly a) where
 -- Exercise 4 -----------------------------------------
 
 plus :: Num a => Poly a -> Poly a -> Poly a
-plus = undefined
+plus (P xs) (P ys) = P $ zipped ++ remaining
+    where   zipped = zipWith (+) xs ys
+            remaining
+                | length xs > length ys = drop ( length ys ) xs
+                | length ys > length xs = drop ( length xs ) ys
+                | otherwise = []
 
 -- Exercise 5 -----------------------------------------
 
