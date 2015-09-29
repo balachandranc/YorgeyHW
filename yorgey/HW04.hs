@@ -78,10 +78,12 @@ applyP (P xs) v = sum $ map (\(coeff,ord)-> coeff * (v ^ ord)) $ zip xs [0..]
 class Num a => Differentiable a where
     deriv  :: a -> a
     nderiv :: Int -> a -> a
-    nderiv = undefined
+    nderiv 0 f = f
+    nderiv n f = nderiv ( n - 1 ) ( deriv f )
 
 -- Exercise 9 -----------------------------------------
 
 instance Num a => Differentiable (Poly a) where
-    deriv = undefined
+    deriv (P []) = P []
+    deriv (P (_:xs)) = P $ map (\(coeff,ord) -> coeff * ( fromInteger ord ) ) $ zip xs [1..] 
 
