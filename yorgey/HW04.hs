@@ -50,15 +50,20 @@ plus (P xs) (P ys) = P $ zipped ++ remaining
 -- Exercise 5 -----------------------------------------
 
 times :: Num a => Poly a -> Poly a -> Poly a
-times = undefined
+times (P xs) (P ys) =   let m = map ( \x -> map (x*) ys ) xs
+                            padded = padZeroes m 0
+                            polys = map P padded
+                        in foldr plus (P [0]) polys
+                        where   padZeroes [] _ = []
+                                padZeroes (x:xs) n = ( ( take n $ repeat 0 ) ++ x ) : padZeroes xs ( n + 1 ) 
 
 -- Exercise 6 -----------------------------------------
 
 instance Num a => Num (Poly a) where
     (+) = plus
     (*) = times
-    negate      = undefined
-    fromInteger = undefined
+    negate      = times (P[-1])
+    fromInteger n = P [ (fromInteger n) ]
     -- No meaningful definitions exist
     abs    = undefined
     signum = undefined
@@ -66,7 +71,7 @@ instance Num a => Num (Poly a) where
 -- Exercise 7 -----------------------------------------
 
 applyP :: Num a => Poly a -> a -> a
-applyP = undefined
+applyP (P xs) v = sum $ map (\(coeff,ord)-> coeff * (v ^ ord)) $ zip xs [0..]
 
 -- Exercise 8 -----------------------------------------
 
