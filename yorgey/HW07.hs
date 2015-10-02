@@ -45,16 +45,46 @@ randomElt vec = do
 
 -- Exercise 4 -----------------------------------------
 
+randomList :: Random a => Int -> Rnd ([a])
+randomList 0 = return []
+randomList n = do
+  first <- getRandom
+  rest <- randomList ( n - 1 )
+  return (first:rest)
+
 randomVec :: Random a => Int -> Rnd (Vector a)
-randomVec = undefined
+randomVec n = do
+  vals <- randomList n
+  return $ V.fromList vals
+
+randomListR :: Random a => Int -> (a, a) -> Rnd ([a])
+randomListR 0 _ = return []
+randomListR n range = do
+  first <- getRandomR range
+  rest <- randomListR ( n - 1 ) range
+  return (first:rest)
 
 randomVecR :: Random a => Int -> (a, a) -> Rnd (Vector a)
-randomVecR = undefined
+randomVecR n range = do
+  vals <- randomListR n range
+  return $ V.fromList vals
 
 -- Exercise 5 -----------------------------------------
 
+swap :: (Int,Int) -> Vector a -> Vector a
+swap (i1,i2) vec = vec // [(i1, vec ! i2), (i2, vec ! i1)]
+
+shuffle' :: Vector a -> Rnd ( Vector a )
+shuffle' vec = do
+  let uppers = reverse [ 1 .. ( ( V.length vec ) - 1 ) ]
+  indices <- mapM ( \x -> getRandomR (0,x) ) uppers
+  return $ foldl (\v tup -> swap tup v) vec $ zip uppers indices
+
 shuffle :: Vector a -> Rnd (Vector a)
-shuffle = undefined
+shuffle vec = do
+  if ( V.length vec ) < 2
+    then return vec
+    else shuffle' vec
 
 -- Exercise 6 -----------------------------------------
 
