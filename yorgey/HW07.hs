@@ -13,6 +13,7 @@ import Data.Vector (Vector, cons, (!), (!?), (//))
 import System.Random
 
 import qualified Data.Vector as V
+import qualified Data.List as L
 
 
 -- Exercise 1 -----------------------------------------
@@ -89,7 +90,10 @@ shuffle vec = do
 -- Exercise 6 -----------------------------------------
 
 partitionAt :: Ord a => Vector a -> Int -> (Vector a, a, Vector a)
-partitionAt = undefined
+partitionAt vec index = let   pivot = vec ! index
+                              (left, right) = splitAt index $ V.toList vec
+                              (smaller, larger) = L.partition (< pivot) $ left ++ tail right
+                        in    (V.fromList smaller, pivot, V.fromList larger)
 
 -- Exercise 7 -----------------------------------------
 
