@@ -104,36 +104,63 @@ quicksort (x:xs) = quicksort [ y | y <- xs, y < x ]
                    <> (x : quicksort [ y | y <- xs, y >= x ])
 
 qsort :: Ord a => Vector a -> Vector a
-qsort = undefined
-
+qsort vec
+      | V.length vec <= 1 = vec
+      | otherwise = let ( smaller, pivot, larger ) = partitionAt vec 0
+                    in ( qsort smaller ) <> V.cons pivot ( qsort larger )
 -- Exercise 8 -----------------------------------------
 
 qsortR :: Ord a => Vector a -> Rnd (Vector a)
-qsortR = undefined
+qsortR vec 
+        | V.length vec <= 1 = return vec
+        | otherwise = do
+          pivotIndex <- getRandomR (0, ( V.length vec - 1 ) )
+          let ( smaller, pivot, larger ) = partitionAt vec pivotIndex
+          left <- qsortR smaller
+          right <- qsortR larger
+          return $ left <> V.cons pivot right
 
 -- Exercise 9 -----------------------------------------
 
 -- Selection
 select :: Ord a => Int -> Vector a -> Rnd (Maybe a)
-select = undefined
+select i vec = do
+  if ( V.length vec ) == 0
+    then do
+      return Nothing
+    else do
+      pivotIndex <- getRandomR (0, ( V.length vec - 1 ))
+      let ( smaller, _, larger ) = partitionAt vec pivotIndex
+      case compare pivotIndex i of
+        EQ -> return $ vec !? pivotIndex
+        LT -> select ( i - pivotIndex - 1 ) larger
+        GT -> select i smaller
+
 
 -- Exercise 10 ----------------------------------------
 
 allCards :: Deck
-allCards = undefined
+allCards = [ Card label suit | label <- labels, suit <- suits ]
 
 newDeck :: Rnd Deck
-newDeck =  undefined
+newDeck =  shuffle allCards
 
 -- Exercise 11 ----------------------------------------
 
 nextCard :: Deck -> Maybe (Card, Deck)
-nextCard = undefined
+nextCard deck = do
+  card <- deck !? 0
+  let rest = V.tail deck
+  return ( card, rest )
 
 -- Exercise 12 ----------------------------------------
 
 getCards :: Int -> Deck -> Maybe ([Card], Deck)
-getCards = undefined
+getCards 0 deck = Just ([], deck)
+getCards n deck = do
+  ( card, nextDeck ) <- nextCard deck
+  ( cards, finalDeck ) <- getCards ( n - 1 ) nextDeck
+  return ( card: cards, finalDeck )
 
 -- Exercise 13 ----------------------------------------
 
