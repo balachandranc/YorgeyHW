@@ -83,12 +83,19 @@ disjunctive_syllogism ( Right q ) _ = q
 -- Exercise 2 -----------------------------------------
 
 composition :: (p -> q) \/ (p -> r) -> p -> q \/ r
-composition = admit
+composition ( Left pq ) p = Left $ pq p
+composition ( Right pr ) p = Right $ pr p
 
 -- Exercise 3 -----------------------------------------
 
 transposition :: (p -> q) <-> (Not q -> Not p)
-transposition = admit
+transposition = Conj dir1 dir2
+  where
+    dir1 = modus_tollens
+    dir2 notq_notp =
+      case excluded_middle of
+        Left q -> (\_ -> q)
+        Right not_q -> ( \p -> absurd $ ( notq_notp not_q ) p )  
 
 -- Exercise 4 -----------------------------------------
 
