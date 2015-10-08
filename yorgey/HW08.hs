@@ -100,7 +100,19 @@ transposition = Conj dir1 dir2
 -- Exercise 4 -----------------------------------------
 
 de_morgan :: Not (p \/ q) <-> (Not p /\ Not q)
-de_morgan = admit
+de_morgan = Conj dir1 dir2
+  where
+    dir1 not_porq =
+      case excluded_middle of
+        Left p -> let not_p = ( \_ -> not_porq $ Left p )
+                  in Conj  not_p ( \_ -> absurd $ ( not_p p ) )
+        Right not_p -> case excluded_middle of
+                          Left q -> let not_q = ( \_ -> not_porq $ Right q )
+                                    in Conj not_p not_q
+                          Right not_q -> Conj not_p not_q 
+    dir2 ( Conj not_p not_q ) = not_porq
+      where not_porq (Left p) = not_p p
+            not_porq (Right q)= not_q q
 
 -- Natural Numbers ------------------------------------
 
