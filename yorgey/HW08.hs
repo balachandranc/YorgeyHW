@@ -92,10 +92,10 @@ transposition :: (p -> q) <-> (Not q -> Not p)
 transposition = Conj dir1 dir2
   where
     dir1 = modus_tollens
-    dir2 notq_notp =
+    dir2 notq_notp p =
       case excluded_middle of
-        Left q -> (\_ -> q)
-        Right not_q -> ( \p -> absurd $ ( notq_notp not_q ) p )  
+        Left q -> q
+        Right not_q -> absurd $ ( notq_notp not_q ) p  
 
 -- Exercise 4 -----------------------------------------
 
