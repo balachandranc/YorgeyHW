@@ -211,7 +211,8 @@ even_plus_one  E_Zero   = O_One
 even_plus_one (E_Rec n) = O_Rec $ even_plus_one n
 
 odd_plus_one :: Odd n -> Even (S n)
-odd_plus_one = admit
+odd_plus_one O_One = E_Rec E_Zero
+odd_plus_one (O_Rec n) = E_Rec $ odd_plus_one n
 
 -- Exercise 8 -----------------------------------------
 
@@ -222,4 +223,6 @@ succ_sum (Succ n) m = case succ_sum n m of
                         Refl -> Refl
 
 double_even :: Forall n -> Even (n + n)
-double_even = admit
+double_even Zero = E_Zero
+double_even (Succ n) = case succ_sum n n of
+                        Refl -> E_Rec $ double_even n
