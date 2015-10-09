@@ -105,7 +105,7 @@ de_morgan = Conj dir1 dir2
     dir1 not_porq =
       case excluded_middle of
         Left p -> let not_p = ( \_ -> not_porq $ Left p )
-                  in Conj  not_p ( \_ -> absurd $ ( not_p p ) )
+                  in Conj  not_p ( \_ -> absurd $ not_p p )
         Right not_p -> case excluded_middle of
                           Left q -> let not_q = ( \_ -> not_porq $ Right q )
                                     in Conj not_p not_q
@@ -184,7 +184,9 @@ n_plus_0 (Succ n) = case n_plus_0 n of
                         Refl {- :: S n + O == S n -}
 
 add_zero :: Forall n -> O + n == n + O
-add_zero = admit
+add_zero Zero = Refl
+add_zero (Succ n) = case add_zero n of
+                      Refl -> Refl
 
 -- Exercise 6 -----------------------------------------
 
