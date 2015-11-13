@@ -35,10 +35,10 @@ allowedDirs ((minX,minY),(maxX,maxY)) (x,y) = do
     return label
 
 moveVertex :: Vertex -> Label -> Vertex
-moveVertex (x,y) UP = (x,y-1)
-moveVertex (x,y) DOWN = (x,y+1)
-moveVertex (x,y) LEFT = (x-1,y)
-moveVertex (x,y) RIGHT = (x+1,y)
+moveVertex (x,y) UP     = (x,y-1)
+moveVertex (x,y) DOWN   = (x,y+1)
+moveVertex (x,y) LEFT   = (x-1,y)
+moveVertex (x,y) RIGHT  = (x+1,y)
 
 nextVertex :: Maze -> Vertex -> IO Vertex
 nextVertex maze vert = do
@@ -52,8 +52,30 @@ randomPath maze path vertex = do
         then return $ path ++ [vertex]
         else do
             vert <- nextVertex maze vertex
-            putStrLn $ show $ length path
+            -- putStrLn $ show $ length path
             randomPath maze (path ++ [vertex]) vert
+
+simplifyPath :: Path -> Path
+simplifyPath [] = []
+simplifyPath (x:xs) = let   simpleTail = simplifyPath xs
+                      in  case elemIndex x simpleTail of
+                            Nothing -> x:simpleTail
+                            Just index -> snd $ splitAt index simpleTail
+
+dirsFromIndices :: Vertex -> Vertex -> Label
+dirsFromIndices (x1,y1) (x2,y2) = case ((x2-x1),(y2-y1)) of
+                                        (0,-1) -> UP
+                                        (0,1)  -> DOWN
+                                        (-1,0) -> LEFT
+                                        (1,0)  -> RIGHT
+
+dirsFromPath :: Path -> [Label]
+dirsFromPath [] = []
+dirsFromPath [x] = []
+dirsFromPath (x:y:xs) = dirsFromIndices x y : dirsFromPath (y:xs)
+
+updateMaze :: Maze -> Path -> [Label] -> Maze
+updateMaze maze path labels = maze // zip path labels
 
 solveMaze' :: Maze -> [Vertex] -> [Vertex] -> IO Maze
 solveMaze' maze unvisited visited = do
@@ -62,8 +84,13 @@ solveMaze' maze unvisited visited = do
         else do
             startVertex <- pickRandom unvisited
             path <- randomPath maze [] startVertex
-            putStrLn $ show path
-            return maze
+            let simplifiedPath = simplifyPath path
+            putStrLn $ show simplifiedPath
+            let pathDirs = dirsFromPath simplifiedPath
+            putStrLn $ show pathDirs
+            let maze' = updateMaze maze simplifiedPath pathDirs
+            -- return maze
+            solveMaze' maze' ( unvisited \\ simplifiedPath ) ( visited ++ simplifiedPath ) 
 
 solveMaze :: Maze -> IO Maze
 solveMaze maze = do
