@@ -1,7 +1,14 @@
+{-# LANGUAGE OverloadedStrings #-}
+
+import Control.Monad
 import Data.Array
 import Data.List
+import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.UTF8 as BS
+import qualified Data.Text as T
+import qualified Data.Text.IO as T
 import System.Random
-import Control.Monad
+import System.IO
 
 data Label = FREE | ROOT | UP | DOWN | LEFT | RIGHT
     deriving (Eq, Show, Enum, Bounded)
@@ -52,18 +59,17 @@ randomPath maze path vertex = do
         then return $ path ++ [vertex]
         else do
             vert <- nextVertex maze vertex
-            -- putStrLn $ show $ length path
             randomPath maze (path ++ [vertex]) vert
 
 simplifyPath :: Path -> Path
 simplifyPath [] = []
-simplifyPath (x:xs) = let   simpleTail = simplifyPath xs
-                      in  case elemIndex x simpleTail of
-                            Nothing -> x:simpleTail
-                            Just index -> snd $ splitAt index simpleTail
+simplifyPath (x:xs) = let simpleTail = simplifyPath xs
+                      in case elemIndex x simpleTail of
+                            Nothing     -> x:simpleTail
+                            Just index  -> snd $ splitAt index simpleTail
 
 dirsFromIndices :: Vertex -> Vertex -> Label
-dirsFromIndices (x1,y1) (x2,y2) = case ((x2-x1),(y2-y1)) of
+dirsFromIndices (y1,x1) (y2,x2) = case ((x2-x1),(y2-y1)) of
                                         (0,-1) -> UP
                                         (0,1)  -> DOWN
                                         (-1,0) -> LEFT
@@ -89,7 +95,6 @@ solveMaze' maze unvisited visited = do
             let pathDirs = dirsFromPath simplifiedPath
             putStrLn $ show pathDirs
             let maze' = updateMaze maze simplifiedPath pathDirs
-            -- return maze
             solveMaze' maze' ( unvisited \\ simplifiedPath ) ( visited ++ simplifiedPath ) 
 
 solveMaze :: Maze -> IO Maze
@@ -100,7 +105,33 @@ solveMaze maze = do
     let maze' = maze // [(rootVertex, ROOT)]
     solveMaze' maze' unvisited visited
 
+mazeWidth :: Maze -> Int
+mazeWidth maze = snd $ snd $ bounds maze
+
+mazeHeight :: Maze -> Int
+mazeHeight maze = fst $ snd $ bounds maze 
+
+borderRow :: Int -> String
+borderRow width = ( '+' : take width (repeat '-') ) ++ ['+']
+
+showMaze :: Maze -> String
+showMaze maze = unlines $ borderRowString ++ (map showRow rows) ++ borderRowString
+                where 
+                    borderRowString = [ borderRow ( 2 * width - 1 ) ]
+                    width = mazeWidth maze
+                    showRow row = ( '|' : intersperse '|' ( showRow' row ) ) ++ ['|']
+                    showRow' row = map lookupSymbol row
+                    lookupSymbol x = case x of
+                                        LEFT    -> 'L'
+                                        RIGHT   -> 'R'
+                                        UP      -> 'U'
+                                        DOWN    -> 'D'
+                                        FREE    -> ' '
+                                        ROOT    -> 'O'
+                    rows = map (\i -> [ maze ! (i,j) | j <- [1..width]]) [1..(mazeHeight maze)]
+
+
 main = do
     let maze = createEmptyMaze (6,4)
     solvedMaze <- solveMaze maze
-    putStrLn $ show solvedMaze
+    putStrLn $ showMaze solvedMaze
