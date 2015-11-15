@@ -132,6 +132,10 @@ showMaze maze = unlines $ borderRowString ++ (map showRow rows) ++ borderRowStri
 
 
 main = do
-    let maze = createEmptyMaze (6,4)
+    putStrLn "Maze Width: "
+    w <- getLine
+    putStrLn "Maze Height: "
+    h <- getLine
+    let maze = createEmptyMaze $ ( read w :: Int, read h :: Int )
     solvedMaze <- solveMaze maze
     putStrLn $ showMaze solvedMaze
