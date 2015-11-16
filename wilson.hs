@@ -3,10 +3,6 @@
 import Control.Monad
 import Data.Array
 import Data.List
-import qualified Data.ByteString.Char8 as BS
-import qualified Data.ByteString.UTF8 as BS
-import qualified Data.Text as T
-import qualified Data.Text.IO as T
 import System.Random
 import System.IO
 
@@ -91,9 +87,7 @@ solveMaze' maze unvisited visited = do
             startVertex <- pickRandom unvisited
             path <- randomPath maze [] startVertex
             let simplifiedPath = simplifyPath path
-            putStrLn $ show simplifiedPath
             let pathDirs = dirsFromPath simplifiedPath
-            putStrLn $ show pathDirs
             let maze' = updateMaze maze simplifiedPath pathDirs
             solveMaze' maze' ( unvisited \\ simplifiedPath ) ( visited ++ simplifiedPath ) 
 
@@ -122,16 +116,17 @@ showMaze maze = unlines $ borderRowString ++ (map showRow rows) ++ borderRowStri
                     showRow row = ( '|' : intersperse '|' ( showRow' row ) ) ++ ['|']
                     showRow' row = map lookupSymbol row
                     lookupSymbol x = case x of
-                                        LEFT    -> 'L'
-                                        RIGHT   -> 'R'
-                                        UP      -> 'U'
-                                        DOWN    -> 'D'
+                                        LEFT    -> '←'
+                                        RIGHT   -> '→'
+                                        UP      -> '↑'
+                                        DOWN    -> '↓'
                                         FREE    -> ' '
-                                        ROOT    -> 'O'
+                                        ROOT    -> '■'
                     rows = map (\i -> [ maze ! (i,j) | j <- [1..width]]) [1..(mazeHeight maze)]
 
 
 main = do
+    hSetEncoding stdout utf8
     putStrLn "Maze Width: "
     w <- getLine
     putStrLn "Maze Height: "
